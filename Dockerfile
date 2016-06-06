@@ -3,6 +3,7 @@ FROM java:8
 # Configuration variables.
 ENV JIRA_HOME     /var/atlassian/jira
 ENV JIRA_INSTALL  /opt/atlassian/jira
+ENV DBCONFIGXML   ${JIRA_HOME}/dbconfig.xml
 ENV JIRA_VERSION  7.1.7
 
 # Install Atlassian JIRA and helper tools and setup initial home
@@ -47,6 +48,7 @@ VOLUME ["/var/atlassian/jira", "/opt/atlassian/jira/logs"]
 WORKDIR /var/atlassian/jira
 
 COPY "docker-entrypoint.sh" "/"
+COPY "dbconfig.template.xml" "/"
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 # Run Atlassian JIRA as a foreground process by default.

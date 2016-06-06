@@ -19,13 +19,13 @@ if [ "$(stat --format "%Y" "${JIRA_INSTALL}/conf/server.xml")" -eq "0" ]; then
 fi
 
 
-# check if the `dbconfig.xml` file has been changed since the creation of this
-# Docker image. If the file has been changed the entrypoint script will not
+# check if `dbconfig.xml` file is in place.
+# If the file has already been put in place, the entrypoint script will not
 # perform modifications to the configuration file.
-if [ "$(stat --format "%Y" "${DBCONFIGXML}")" -eq "0" ]; then
+if [ ! -f "${DBCONFIGXML}" ]; then
   if [ -n "${DBURL}" ]; then
-
-    cp "${JIRA_HOME}/dbconfig.tmeplate.xml" "${DBCONFIGXML}"
+    set -x
+    cp "/dbconfig.template.xml" "${DBCONFIGXML}"
 
     xmlstarlet ed --inplace --pf --ps --update '//database-type' --value "${DBTYPE}" "${DBCONFIGXML}"
     xmlstarlet ed --inplace --pf --ps --update '//jdbc-datasource/url' --value "${DBURL}" "${DBCONFIGXML}"
