@@ -18,4 +18,23 @@ if [ "$(stat --format "%Y" "${JIRA_INSTALL}/conf/server.xml")" -eq "0" ]; then
   fi
 fi
 
+
+# check if the `dbconfig.xml` file has been changed since the creation of this
+# Docker image. If the file has been changed the entrypoint script will not
+# perform modifications to the configuration file.
+if [ "$(stat --format "%Y" "${DBCONFIGXML}")" -eq "0" ]; then
+  if [ -n "${DBURL}" ]; then
+
+    cp "${JIRA_HOME}/dbconfig.tmeplate.xml" "${DBCONFIGXML}"
+
+    xmlstarlet ed --inplace --pf --ps --update '//database-type' --value "${DBTYPE}" "${DBCONFIGXML}"
+    xmlstarlet ed --inplace --pf --ps --update '//jdbc-datasource/url' --value "${DBURL}" "${DBCONFIGXML}"
+    xmlstarlet ed --inplace --pf --ps --update '//jdbc-datasource/driver-class' --value "${DBDRIVER}" "${DBCONFIGXML}"
+    xmlstarlet ed --inplace --pf --ps --update '//jdbc-datasource/username' --value "${DBUSER}" "${DBCONFIGXML}"
+    xmlstarlet ed --inplace --pf --ps --update '//jdbc-datasource/password' --value "${DBPASS}" "${DBCONFIGXML}"
+    xmlstarlet ed --inplace --pf --ps --update '//jdbc-datasource/pool-min-size' --value "${DBPOOLMINSZ}" "${DBCONFIGXML}"
+    xmlstarlet ed --inplace --pf --ps --update '//jdbc-datasource/pool-max-size' --value "${DBPOOLMAXSZ}" "${DBCONFIGXML}"
+  fi
+fi
+
 exec "$@"
