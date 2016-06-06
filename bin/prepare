@@ -6,6 +6,17 @@
 # VERSION. If no VERSION information is specified the latest version is
 # retrieved from the Atlassian JIRA download feed.
 
+case $(sed --help 2>&1) in
+  *GNU*)
+    SED_EXTENDED="-r"
+    SED_INPLACE=(--in-place)
+    ;;
+  *)
+    SED_EXTENDED="-E"
+    SED_INPLACE=(-i '')
+    ;;
+esac
+
 if [[ "$(git rev-parse --abbrev-ref HEAD)" != "master" && -z "$1" ]]; then
 	echo "Not master branch and therefore nothing to prepare"
 	exit 0
@@ -17,7 +28,7 @@ echo "Obtaining Altassian JIRA version information..."
 
 # Obtain the currently latest version of Atlassian JIRA version defined by the
 # Dockerfile in this repository.
-CURRENT_VERSION=$(sed -nr 's/ENV JIRA_VERSION[[:space:]]*(.+)/\1/p' Dockerfile)
+CURRENT_VERSION=$(sed ${SED_EXTENDED} -n 's/ENV JIRA_VERSION[[:space:]]*(.+)/\1/p' Dockerfile)
 
 # Obtain the latest Atlassian JIRA version by going to the JSON version feed
 # information to get a JSONP formatted response, strip the output to retrieve
@@ -33,6 +44,6 @@ echo "Preparing branch for version new Atlassian JIRA version"
 
 # Edit the `Dockerfile` by changing the current version to the new obtained
 # version from the Atlassian JIRA version feed.
-sed --in-place "s/${CURRENT_VERSION}/${VERSION}/g" Dockerfile
+sed "${SED_INPLACE[@]}" "s/${CURRENT_VERSION}/${VERSION}/g" Dockerfile
 
 echo "Ready for acceptance testing"
