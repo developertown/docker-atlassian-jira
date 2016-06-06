@@ -39,6 +39,12 @@ USER daemon:daemon
 # Expose default HTTP connector port.
 EXPOSE 8080
 
+# Expose a second non-SSL listener for offloaded SSL setups that still want a split HTTP/HTTPS listener
+EXPOSE 8081
+
+# Expose 8443 for split HTTP/HTTPS setups
+EXPOSE 8443
+
 # Set volume mount points for installation, home directory and tomcat configuration. Changes to the
 # home directory needs to be persisted as well as parts of the installation
 # directory due to eg. logs.
